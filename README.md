@@ -18,13 +18,23 @@ Binary classification of EMG signals to distinguish **Rock** vs **Paper** hand g
 
 ## Results
 
-| Classifier | Accuracy | F1-Score | AUC |
-|------------|----------|----------|-----|
-| SVM-RBF    | 79.40%   | —        | —   |
-| Random Forest | 78.38% | —      | —   |
-| XGBoost    | 78.12%   | —        | —   |
+### Hold-out (80/20 split)
 
-Best model: **SVM-RBF** after hyperparameter tuning via GridSearchCV.
+| Classifier | Accuracy | F1-Score | Sensitivity | Specificity | Precision |
+|------------|----------|----------|-------------|-------------|-----------|
+| SVM-RBF    | 78.97%   | 80.63%   | 87.07%      | 70.79%      | 75.07%    |
+| Random Forest | 78.38% | 78.69% | 79.42%     | 77.32%      | 77.96%    |
+| XGBoost    | 75.90%   | 76.38%   | 77.55%      | 74.23%      | 75.25%    |
+
+### 5-Fold Cross-Validation
+
+| Classifier | Mean Accuracy | Std |
+|------------|--------------|-----|
+| SVM-RBF    | 77.76%       | ±0.83% |
+| Random Forest | 76.99%    | ±0.79% |
+| XGBoost    | 75.52%       | ±0.87% |
+
+Best model: **SVM-RBF** (F1: 80.63%, Accuracy: 78.97%) after GridSearchCV tuning.
 
 ## Repository Structure
 
