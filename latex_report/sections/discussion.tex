@@ -1,0 +1,47 @@
+\section{Discussion and Conclusions}
+
+This study implemented and evaluated a complete machine learning pipeline for EMG-based binary
+gesture classification. The primary finding is that SVM with an RBF kernel is the most effective
+classifier for this task, achieving the highest hold-out accuracy (78.97\%), F1 score (80.63\%),
+and AUC (0.875). This aligns with the established literature, which consistently identifies SVM
+as a strong performer for EMG classification due to its ability to learn non-linear decision
+boundaries in high-dimensional feature spaces \citep{Oskoei2007}. The high sensitivity of
+SVM-RBF (87.07\%) reflects its tendency to classify borderline trials as Paper, which may be
+appropriate in applications where missing a Paper gesture is more costly than a false alarm.
+
+The feature-domain ablation study provides a key methodological insight: no single feature domain
+is sufficient for robust gesture classification, and multi-domain feature fusion is essential.
+Entropy features were the most informative individual group (75.04\%), suggesting that signal
+complexity and irregularity are the most discriminative properties for distinguishing these two
+gestures on a single EMG channel. The poor performance of frequency-domain features alone
+(68.97\%) is consistent with the nature of the task --- both Rock and Paper involve sustained,
+relatively static muscle postures rather than dynamic motion, resulting in limited spectral
+differences. The 4.45 percentage point gain from combining all domains (79.49\%) confirms the
+complementary nature of multi-domain feature extraction.
+
+\textbf{Comparison with published benchmarks.}
+The 78.97\% hold-out accuracy achieved by SVM-RBF is consistent with published results for
+comparable setups: \citet{Phinyomark2012} reported time-domain feature classification accuracies
+in the range of 70--85\% for binary EMG gesture tasks, while \citet{Oskoei2007} reported SVM
+accuracies of 80--95\% using multi-channel (6--10 channels) upper-limb recordings. The
+performance gap relative to multi-channel studies confirms that single-channel measurement is
+the primary limiting factor rather than the choice of classifier or feature extraction strategy.
+
+\textbf{Validation strategy comparison.}
+5-fold cross-validation provides the most reliable estimate of generalisation performance
+(SVM: $77.76\% \pm 0.83\%$), while GridSearchCV enables systematic hyperparameter selection
+across all three classifiers. SVM-RBF achieved the best tuned accuracy of 79.40\%
+(\texttt{C}=10, \texttt{gamma}=0.01), confirming it as the strongest classifier under all
+three evaluation strategies. The close agreement between hold-out and CV results across
+all classifiers suggests the dataset is sufficiently large and balanced for hold-out
+evaluation to be approximately representative.
+
+\textbf{Limitations and future work.}
+The overall accuracy range of 75--79\% reflects the inherent challenge of binary EMG
+classification from a single channel. Multi-channel recordings would capture richer spatial
+information about muscle activation patterns and likely improve classification substantially.
+Subject-dependence is a further limitation: the pipeline was trained and tested within a single
+recording context without subject-independent cross-validation. Future work should address this
+through Leave-One-Subject-Out (LOSO) cross-validation, and extend the pipeline to multiclass
+classification (Rock, Paper, Scissor) and deep learning architectures such as 1D CNNs or BiLSTMs
+for end-to-end feature learning from raw signals.

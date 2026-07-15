@@ -1,0 +1,43 @@
+=== HOLD-OUT PERFORMANCE REPORT ===
+              Accuracy Sensitivity Specificity Precision F1 Score
+Classifier                                                       
+Random Forest   78.38%      79.42%      77.32%    77.96%   78.69%
+SVM (RBF)       78.97%      87.07%      70.79%    75.07%   80.63%
+XGBoost         75.90%      77.55%      74.23%    75.25%   76.38%
+
+=== DETAILED REPORT — BEST MODEL: SVM (RBF) ===
+              precision    recall  f1-score   support
+
+        Rock       0.84      0.71      0.77       582
+       Paper       0.75      0.87      0.81       588
+
+    accuracy                           0.79      1170
+   macro avg       0.80      0.79      0.79      1170
+weighted avg       0.80      0.79      0.79      1170
+
+
+=== 5-FOLD CROSS-VALIDATION ===
+Random Forest        → Mean: 76.99% ± 0.79%
+SVM (RBF)            → Mean: 77.76% ± 0.83%
+XGBoost              → Mean: 75.52% ± 0.87%
+
+
+=== GRIDSEARCHCV RESULTS ===
+Best parameters : {'max_depth': 10, 'min_samples_split': 2, 'n_estimators': 100}
+Best CV accuracy: 77.09%
+Test accuracy (tuned RF): 78.38%
+
+
+=== FINAL VALIDATION COMPARISON ===
+              Hold-out Acc (%) CV Mean Acc (%) CV Std (%) GridSearch Acc (%)
+Classifier                                                                  
+Random Forest            78.38           76.99       0.79              78.38
+SVM (RBF)                78.97           77.76       0.83                N/A
+XGBoost                  75.90           75.52       0.87                N/A
+
+=== FEATURE SET COMPARISON ===
+Statistical only          → Accuracy: 73.08%
+Time-domain only          → Accuracy: 73.33%
+Frequency-domain only     → Accuracy: 68.97%
+Entropy only              → Accuracy: 75.04%
+All features combined     → Accuracy: 79.49%

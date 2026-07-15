@@ -1,0 +1,155 @@
+\section{Results}
+
+\subsection{Feature Set Comparison}
+
+To quantify the individual contribution of each feature domain, Random Forest was trained and
+evaluated under hold-out validation for each feature group separately and for the combined
+26-feature set. The results are shown in Table~\ref{tab:featureset} and Figure~\ref{fig:fscomp}.
+
+\begin{table}[H]
+    \centering
+    \caption{Classification accuracy by feature domain using Random Forest (100 trees,
+    hold-out 80/20). Best result in bold.}
+    \label{tab:featureset}
+    \begin{tabular}{lc}
+        \toprule
+        \textbf{Feature Set} & \textbf{Hold-out Accuracy (\%)} \\
+        \midrule
+        Statistical only (8 features)          & 73.08 \\
+        Time-domain only (7 features)          & 73.33 \\
+        Frequency-domain only (6 features)     & 68.97 \\
+        Entropy only (5 features)              & 75.04 \\
+        \textbf{All features combined (26 features)} & \textbf{79.49} \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.70\textwidth]{figures/feature_set_comparison}
+    \caption{Classification accuracy by feature domain. Combining all 26 features achieves
+    79.49\%, outperforming every individual domain. Entropy features are the strongest single
+    group (75.04\%), while frequency-domain features alone are the weakest (68.97\%).}
+    \label{fig:fscomp}
+\end{figure}
+
+Combining all feature types (79.49\%) outperforms the best single domain (entropy, 75.04\%)
+by 4.45 percentage points, confirming that each domain contributes complementary information.
+Entropy features capture signal complexity differences between Rock and Paper muscle activation,
+making them the most informative individual group. Frequency-domain features perform the weakest
+alone (68.97\%), as both gestures involve sustained static postures with limited spectral
+differences on a single channel.
+
+\subsection{Feature Importance}
+
+To identify which individual features drive classification, a separate Random Forest (100 trees)
+was fitted on the Kruskal-Wallis selected features before PCA reduction, so that importances
+map back to interpretable feature names. The results are shown in Figure~\ref{fig:importance}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.72\textwidth]{figures/feature_importance}
+    \caption{Random Forest feature importance (mean decrease in impurity) for the
+    Kruskal-Wallis selected features. Higher values indicate greater discriminative power
+    for separating Rock from Paper gestures.}
+    \label{fig:importance}
+\end{figure}
+
+\subsection{Classifier Performance}
+
+Table~\ref{tab:classifiers} presents complete performance metrics for all three classifiers
+evaluated on the combined 26-feature set after Kruskal-Wallis selection and PCA reduction
+(95\% variance retained). Figure~\ref{fig:cm_roc} shows the corresponding confusion matrices
+and ROC curves.
+
+\begin{table}[H]
+    \centering
+    \caption{Complete performance metrics for all classifiers under hold-out validation
+    (80/20 split). Best per-metric values in bold.}
+    \label{tab:classifiers}
+    \begin{tabular}{lccccc}
+        \toprule
+        \textbf{Classifier} & \textbf{Accuracy} & \textbf{Sensitivity} &
+        \textbf{Specificity} & \textbf{F1 Score} & \textbf{AUC} \\
+        \midrule
+        Random Forest        & 78.38\% & 79.42\% & 77.32\% & 78.69\% & 0.866 \\
+        \textbf{SVM (RBF)}   & \textbf{78.97\%} & \textbf{87.07\%} & 70.79\% &
+                               \textbf{80.63\%} & \textbf{0.875} \\
+        XGBoost              & 75.90\% & 77.55\% & 74.23\% & 76.38\% & 0.850 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.90\textwidth]{figures/confusion_roc}
+    \caption{Confusion matrices (top row) and ROC curves (bottom row) for Random Forest,
+    SVM (RBF), and XGBoost under hold-out validation. SVM (RBF) achieves the highest AUC
+    (0.875) and F1 score (80.63\%) but trades lower specificity (70.79\%) for higher
+    sensitivity (87.07\%).}
+    \label{fig:cm_roc}
+\end{figure}
+
+SVM-RBF achieves the highest accuracy (78.97\%), F1 score (80.63\%), and AUC (0.875). Its high
+sensitivity (87.07\%) indicates strong detection of Paper gestures but comes at the cost of lower
+specificity (70.79\%). Random Forest shows the most balanced trade-off between sensitivity
+(79.42\%) and specificity (77.32\%). XGBoost performs the weakest across all metrics with an
+accuracy of 75.90\% and AUC of 0.850.
+
+\subsection{Validation Strategy Comparison}
+
+Table~\ref{tab:validation} and Figures~\ref{fig:cv}--\ref{fig:comparison} compare the three
+validation strategies across all classifiers.
+
+\begin{table}[H]
+    \centering
+    \caption{Validation strategy comparison. GridSearchCV applied to all three classifiers
+    using 5-fold CV (RF: 18 configs, best CV 77.09\%; SVM: 12 configs, best CV 77.86\%;
+    XGBoost: 18 configs, best CV 76.92\%).}
+    \label{tab:validation}
+    \begin{tabular}{lccc}
+        \toprule
+        \textbf{Classifier} & \textbf{Hold-out (\%)} &
+        \textbf{CV Mean $\pm$ Std (\%)} & \textbf{GridSearch (\%)} \\
+        \midrule
+        Random Forest      & 78.38 & $76.99 \pm 0.79$ & 78.38 \\
+        \textbf{SVM (RBF)} & \textbf{78.97} & $\mathbf{77.76 \pm 0.83}$ & \textbf{79.40} \\
+        XGBoost            & 75.90 & $75.52 \pm 0.87$ & 78.12 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/crossval}
+        \caption{5-fold cross-validation accuracy distributions. SVM (RBF) achieves the
+        highest mean (77.76\%, $\pm$0.83\%), confirming consistent generalisation.}
+        \label{fig:cv}
+    \end{minipage}\hfill
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/gridsearch_heatmap}
+        \caption{GridSearchCV heatmap for Random Forest (5-fold CV). Optimal:
+        \texttt{n\_estimators}=100, \texttt{max\_depth}=10; best CV score 77.09\%.}
+        \label{fig:heatmap}
+    \end{minipage}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.68\textwidth]{figures/comparison}
+    \caption{Grouped bar chart comparing hold-out, CV mean, and GridSearchCV accuracy for
+    all classifiers. SVM (RBF) consistently leads across hold-out and CV validation.
+    GridSearchCV tuning of Random Forest confirmed near-optimal default hyperparameters.}
+    \label{fig:comparison}
+\end{figure}
+
+SVM (RBF) consistently achieves the highest accuracy across hold-out (78.97\%), 5-fold CV
+(77.76\% $\pm$ 0.83\%), and GridSearchCV (79.40\%). The small gap between hold-out and CV
+results suggests that the hold-out result is slightly optimistic --- a typical outcome of
+single-split evaluation. GridSearchCV confirmed near-optimal defaults for all three classifiers:
+RF (\texttt{n\_estimators}=100, \texttt{max\_depth}=10, \texttt{min\_samples\_split}=2,
+78.38\%), SVM-RBF (\texttt{C}=10, \texttt{gamma}=0.01, 79.40\%), and XGBoost
+(\texttt{n\_estimators}=100, \texttt{max\_depth}=3, \texttt{learning\_rate}=0.1, 78.12\%).

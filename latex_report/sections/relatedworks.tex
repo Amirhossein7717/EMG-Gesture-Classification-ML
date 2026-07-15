@@ -1,0 +1,33 @@
+\section{Related Works}
+
+EMG-based gesture classification has been extensively studied in the biomedical signal processing
+literature. \citet{Phinyomark2012} conducted a comprehensive evaluation of time-domain EMG
+features, showing that Root Mean Square (RMS) and Zero Crossing Rate (ZCR) are among the most
+discriminative and computationally efficient features for gesture recognition. Their work provided
+a systematic foundation for multi-domain feature extraction pipelines and directly motivates the
+inclusion of time-domain features in this study alongside statistical, frequency-domain, and
+entropy features. Reported classification accuracies for binary gesture tasks using time-domain
+features ranged from 70--85\%, providing a direct reference point for evaluating the present
+results.
+
+Support Vector Machines with kernel functions have been consistently identified as strong
+performers for EMG classification. \citet{Oskoei2007} benchmarked multiple classifiers on
+upper-limb EMG data and found that SVM with an RBF kernel outperformed k-Nearest Neighbour and
+Linear Discriminant Analysis in most conditions, particularly when class boundaries were
+non-linear in feature space. Their reported SVM accuracies of 80--95\% were obtained with
+multi-channel (6--10 channel) recordings, which explains the expected performance gap relative
+to the single-channel setup used here. This result directly motivates the inclusion of SVM-RBF
+as a primary classifier in this study.
+
+Ensemble methods have demonstrated competitive performance in biosignal tasks. \citet{Atzori2016}
+evaluated Random Forest on the NinaPro EMG database alongside deep learning models, finding it
+competitive while offering greater interpretability. XGBoost, introduced by \citet{Chen2016}, is
+a regularised gradient-boosted tree ensemble that achieves state-of-the-art results across
+diverse benchmarks. Including both RF and XGBoost alongside SVM-RBF provides a representative
+comparison of tree-based ensembles versus kernel-based approaches.
+
+For feature selection, Kruskal-Wallis hypothesis testing has been applied in biomedical signal
+processing to identify statistically discriminative features without assuming normally distributed
+data --- an important consideration for entropy features \citep{Subasi2013}. Combined with PCA
+for dimensionality reduction, this two-stage selection pipeline reduces the risk of overfitting
+while preserving the most informative feature components.

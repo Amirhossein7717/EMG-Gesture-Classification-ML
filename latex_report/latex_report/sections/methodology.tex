@@ -1,0 +1,163 @@
+\section{Methodology}
+
+\subsection{Dataset Description}
+
+The dataset was provided by the Maersk Mc-Kinney Moller Institute at the University of Southern
+Denmark as part of the Tools of Artificial Intelligence course. It contains single-channel EMG
+recordings for three hand gestures (Rock, Paper, Scissor) stored as separate CSV files. For this
+binary classification task, \texttt{RockData.csv} (2\,909 trials, label\,=\,0) and
+\texttt{PaperData.csv} (2\,941 trials, label\,=\,1) were merged to form a combined dataset of
+5\,850 trials. Each trial contains 1\,024 time-series samples recorded at a sampling frequency
+of $f_s = 256$\,Hz, corresponding to approximately 4\,seconds of signal per trial. The class
+distribution is nearly balanced (49.7\% Rock, 50.3\% Paper), eliminating the need for any class
+balancing technique. Figure~\ref{fig:visualisation} shows the exploratory visualisation of the
+dataset.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.82\textwidth]{figures/visualisation}
+    \caption{Exploratory dataset visualisation. (Top-left) Representative EMG signals for Rock
+    and Paper trials. (Top-right) Class distribution showing near-balanced classes (Rock: 2\,909,
+    Paper: 2\,941). (Bottom-left) Mean signal per class averaged over all trials. (Bottom-right)
+    Amplitude density distributions per class, showing significant overlap reflecting
+    single-channel measurement limitations.}
+    \label{fig:visualisation}
+\end{figure}
+
+\subsection{Data Preprocessing}
+
+\textbf{Missing Value Analysis.}
+The complete feature matrix ($5\,850 \times 1\,024$) was examined for missing values. The total
+NaN count was zero, confirming a complete dataset requiring no imputation. Had missing values
+been present, mean imputation would have been applied --- it preserves the signal's overall
+amplitude distribution and is appropriate when missingness is small and approximately random
+\citep{Little2002}.
+
+\textbf{Signal Filtering.}
+According to the dataset description provided by the course, the EMG signals were already
+filtered prior to recording. Therefore, no additional signal processing (notch filtering at
+50\,Hz or bandpass filtering between 0.5--30\,Hz) was applied. The signals are used directly
+for feature extraction.
+
+\subsection{Feature Extraction}
+
+A total of 26 features were extracted from each trial across four domains. Multi-domain feature
+extraction is motivated by the complementary nature of different feature types: statistical
+features capture amplitude distribution, time-domain features capture temporal dynamics,
+frequency-domain features capture spectral content, and entropy features capture signal
+complexity. All features were computed on the full 1\,024-sample trial signal.
+
+\begin{itemize}
+    \item \textbf{Statistical features (8):} Mean, Median, Standard Deviation, Variance,
+          Skewness, Kurtosis, Range, Interquartile Range (IQR).
+    \item \textbf{Time-domain features (7):} Root Mean Square (RMS), Zero Crossing Rate (ZCR),
+          Autocorrelation, Mean Absolute Deviation (MAD), Maximum, Minimum, Signal Energy.
+    \item \textbf{Frequency-domain features (6):} Dominant Frequency, Total Power,
+          Band Power (0.5--40\,Hz), Mean Frequency, Median Frequency, Frequency Variance ---
+          computed using Welch's Power Spectral Density estimate at $f_s = 256$\,Hz.
+    \item \textbf{Entropy features (5):} Sample Entropy, Spectral Entropy, Permutation Entropy,
+          SVD Entropy, and Lempel-Ziv (LZiv) Complexity --- quantifying signal regularity and
+          complexity.
+\end{itemize}
+
+Key feature definitions are provided below. The mean and standard deviation characterise signal
+amplitude distribution:
+
+\begin{equation}
+    \mu = \frac{1}{N} \sum_{i=1}^{N} x_i
+    \label{eq:mean}
+\end{equation}
+
+\begin{equation}
+    \sigma = \sqrt{\frac{1}{N} \sum_{i=1}^{N} \left(x_i - \mu\right)^2}
+    \label{eq:std}
+\end{equation}
+
+\noindent where $x_i$ is the $i$-th sample and $N = 1\,024$ is the number of samples per trial.
+RMS and Signal Energy quantify signal power:
+
+\begin{equation}
+    \mathrm{RMS} = \sqrt{\frac{1}{N} \sum_{i=1}^{N} x_i^2}
+    \label{eq:rms}
+\end{equation}
+
+\begin{equation}
+    E = \sum_{i=1}^{N} x_i^2
+    \label{eq:energy}
+\end{equation}
+
+\subsection{Feature Selection}
+
+\textbf{Step 1 --- Standardisation.}
+All 26 features were standardised to zero mean and unit variance using \texttt{StandardScaler}
+prior to feature selection, as both Kruskal-Wallis and PCA are sensitive to feature scale
+differences.
+
+\textbf{Step 2 --- Kruskal-Wallis Test.}
+The non-parametric Kruskal-Wallis H-test was applied to each feature to assess whether its
+distribution differed significantly between Rock and Paper classes. Features with $p < 0.05$
+were retained. The Kruskal-Wallis test was chosen over ANOVA because it does not assume
+normality --- a critical consideration for entropy-based measures. Figure~\ref{fig:kruskal}
+shows the four most discriminative features identified.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.78\textwidth]{figures/kruskal_boxplot}
+    \caption{Box plots of the four most discriminative features identified by the Kruskal-Wallis
+    test ($p < 0.05$). Rock class (blue) shows consistently higher median values than Paper
+    class (orange) for all four features, indicating clear distributional differences that
+    support classification.}
+    \label{fig:kruskal}
+\end{figure}
+
+\textbf{Step 3 --- PCA.}
+Principal Component Analysis was applied to the selected features, retaining components that
+cumulatively explain 95\% of the total variance. PCA transforms the feature space into
+orthogonal, uncorrelated components ordered by variance, removing redundant information and
+reducing the risk of overfitting. Figure~\ref{fig:pca} shows the 2D PCA projection.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.52\textwidth]{figures/pca_scatter}
+    \caption{2D PCA projection of the gesture feature space after Kruskal-Wallis selection.
+    Rock trials (blue) and Paper trials (orange) show partial but meaningful separation along
+    PC\,1. The overlap reflects the inherent difficulty of single-channel EMG discrimination
+    between these two gestures.}
+    \label{fig:pca}
+\end{figure}
+
+\subsection{Classification Models}
+
+Three classifiers representing distinct algorithmic families were implemented and compared:
+
+\begin{itemize}
+    \item \textbf{Random Forest (RF):} An ensemble of 100 decision trees trained on bootstrap
+          samples. Each tree independently votes and the majority determines the prediction. RF
+          is robust to overfitting and handles non-linear boundaries well \citep{Breiman2001}.
+    \item \textbf{SVM with RBF Kernel (SVM-RBF):} Maps the feature space to a
+          higher-dimensional space using the kernel
+          $K(\mathbf{x}_i, \mathbf{x}_j) = \exp\!\left(-\|\mathbf{x}_i - \mathbf{x}_j\|^2 /
+          2\sigma^2\right)$, enabling non-linear classification while maximising the margin
+          between classes \citep{Oskoei2007}.
+    \item \textbf{XGBoost:} A regularised gradient-boosted tree ensemble that iteratively fits
+          trees to the residual errors of previous trees. Includes L1 and L2 regularisation to
+          control overfitting \citep{Chen2016}.
+\end{itemize}
+
+\subsection{Validation Strategies}
+
+\begin{itemize}
+    \item \textbf{Hold-out (80/20 split):} 4\,680 training samples and 1\,170 test samples
+          using stratified random sampling to preserve class proportions. Fast and simple, but
+          sensitive to the random split chosen.
+    \item \textbf{5-Fold Stratified Cross-Validation:} The dataset was partitioned into 5 folds
+          of equal size. Each fold served once as the test set while the remaining 4 folds were
+          used for training. Results are averaged across all 5 folds, providing a reliable
+          estimate of generalisation.
+    \item \textbf{GridSearchCV:} Exhaustive hyperparameter search applied to all three
+          classifiers using 5-fold CV: RF over $n\_\mathrm{estimators}$,
+          $\mathrm{max\_depth}$, $\mathrm{min\_samples\_split}$ (18 configs, 90 fits);
+          SVM-RBF over $C$ and $\gamma$ (12 configs, 60 fits); XGBoost over
+          $n\_\mathrm{estimators}$, $\mathrm{max\_depth}$, $\mathrm{learning\_rate}$
+          (18 configs, 90 fits).
+\end{itemize}

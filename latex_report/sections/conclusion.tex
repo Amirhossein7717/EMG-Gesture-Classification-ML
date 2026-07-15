@@ -1,0 +1,31 @@
+\section{Reflection}
+
+This project provided a comprehensive hands-on experience with every stage of a real machine
+learning pipeline applied to physiological signal data. The most technically demanding aspect
+was implementing the entropy feature extraction --- particularly Sample Entropy and LZiv
+Complexity --- which required careful implementation using explicit \texttt{float64} conversion
+and binary signal thresholding to ensure numerical stability across all 5\,850 trials.
+Debugging the Kruskal-Wallis \texttt{ValueError} caused by zero-variance features after
+standardisation was another instructive challenge, resolved by wrapping the test in a
+\texttt{try-except} block.
+
+A key observation was the impact of feature selection on downstream classification performance.
+The Kruskal-Wallis test revealed that not all 26 extracted features are statistically significant
+for this classification task, and reducing the feature space before PCA led to more numerically
+stable principal components. The feature-domain ablation experiment was a particularly valuable
+addition to the pipeline: it transformed a broad task requirement into a concrete, quantified
+experimental finding --- demonstrating that entropy features are the most informative single
+domain and that frequency-domain features contribute the least when used in isolation.
+
+Working individually rather than in a group required a more systematic approach to comparative
+analysis: multiple classifiers, validation strategies, and feature sets were compared
+systematically, providing analytical breadth equivalent to a group project. The addition of a
+feature importance analysis and a GridSearchCV heatmap gave further insight into which features
+and hyperparameters drive performance, reinforcing the experimental findings.
+
+This project has strengthened understanding of the full ML pipeline --- from signal-level
+preprocessing decisions through to the interpretation of confusion matrices, ROC curves,
+cross-validation stability, and feature importance rankings. Future directions include extending
+to multiclass gesture classification, incorporating multi-channel EMG, exploring subject-independent
+generalisation, and investigating whether deep learning methods such as 1D CNNs or BiLSTMs can
+further improve accuracy on this dataset.

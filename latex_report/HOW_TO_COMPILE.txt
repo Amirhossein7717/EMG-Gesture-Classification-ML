@@ -1,0 +1,30 @@
+HOW TO COMPILE THE LATEX REPORT
+================================
+
+1. COPY YOUR FIGURES
+   Copy these PNG files from where your notebook saved them
+   into the  latex_report/figures/  folder:
+
+     visualisation.png
+     kruskal_boxplot.png
+     pca_scatter.png
+     feature_set_comparison.png
+     confusion_roc.png
+     feature_importance.png     <- new
+     gridsearch_heatmap.png     <- new
+     crossval.png
+     comparison.png
+
+2. COMPILE (run twice so table of contents is correct)
+   In the latex_report/ folder:
+
+     pdflatex main.tex
+     bibtex main
+     pdflatex main.tex
+     pdflatex main.tex
+
+   Or open main.tex in Overleaf, upload all files and figures,
+   and click Compile.
+
+3. OUTPUT
+   main.pdf  -- your final submission report
