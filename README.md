@@ -14,7 +14,7 @@ Binary classification of EMG signals to distinguish **Rock** vs **Paper** hand g
 - **Dataset:** 5850 trials from the Ninapro DB2 dataset
 - **Features:** 26 features across 4 domains (time-domain, frequency-domain, time-frequency, statistical)
 - **Classifiers:** Random Forest, SVM-RBF, XGBoost
-- **Validation:** Hold-out, k-Fold Cross-Validation, Leave-One-Subject-Out (LOSO)
+- **Validation:** Hold-out (80/20), 5-Fold Cross-Validation, GridSearchCV hyperparameter tuning
 
 ## Results
 
@@ -34,7 +34,7 @@ Binary classification of EMG signals to distinguish **Rock** vs **Paper** hand g
 | Random Forest | 76.99%    | ±0.79% |
 | XGBoost    | 75.52%       | ±0.87% |
 
-Best model: **SVM-RBF** (F1: 80.63%, Accuracy: 78.97%) after GridSearchCV tuning.
+Best model: **SVM-RBF** (Accuracy: 78.97%, F1: 80.63%). GridSearchCV was applied to Random Forest, confirming stable performance at 78.38%.
 
 ## Repository Structure
 
